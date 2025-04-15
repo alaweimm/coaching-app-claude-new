@@ -1,0 +1,44 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Primary blue shades for headers
+        'blue-primary': {
+          900: '#1A365D',
+          800: '#2A4A7D',
+          700: '#3B5998',
+          600: '#4B69A8',
+        },
+        // Orange accent
+        'orange-accent': '#FF8C00',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      spacing: {
+        '72': '18rem',
+        '84': '21rem',
+        '96': '24rem',
+      },
+      borderRadius: {
+        'xl': '1rem',
+        '2xl': '1.5rem',
+      },
+      boxShadow: {
+        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      },
+      minHeight: {
+        'screen-75': '75vh',
+      },
+      screens: {
+        'print': {'raw': 'print'},
+      },
+    },
+  },
+  plugins: [],
+}
