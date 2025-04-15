@@ -1,0 +1,252 @@
+// api.js - Service for handling API requests for the coaching dashboard
+
+import axios from 'axios';
+
+// Base API URL - this would be changed to your actual API endpoint
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api';
+
+// Create an axios instance with default config
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add request interceptor for authentication
+apiClient.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
+// API Service Object
+const apiService = {
+  // Authentication
+  login: async (email, password) => {
+    try {
+      const response = await apiClient.post('/auth/login', { email, password });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Client Data
+  getClientData: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateClientData: async (clientId, data) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}`, data);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Measurements
+  getClientMeasurements: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/measurements`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  addMeasurement: async (clientId, measurementData) => {
+    try {
+      const response = await apiClient.post(`/clients/${clientId}/measurements`, measurementData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Nutrition Protocol
+  getNutritionProtocol: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/nutrition`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateNutritionProtocol: async (clientId, nutritionData) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}/nutrition`, nutritionData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Training Programs
+  getTrainingPrograms: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/training`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateTrainingProgram: async (clientId, programData) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}/training`, programData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Weekly Check-ins
+  getWeeklyCheckIns: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/checkins`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  submitWeeklyCheckIn: async (clientId, checkInData) => {
+    try {
+      const response = await apiClient.post(`/clients/${clientId}/checkins`, checkInData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Goals
+  getClientGoals: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/goals`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateClientGoals: async (clientId, goalsData) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}/goals`, goalsData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Health Markers
+  getHealthMarkers: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/health-markers`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateHealthMarkers: async (clientId, markersData) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}/health-markers`, markersData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Supplements
+  getSupplements: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/supplements`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateSupplements: async (clientId, supplementsData) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}/supplements`, supplementsData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // PED Program (with access control)
+  getPEDProgram: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/ped-program`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updatePEDProgram: async (clientId, pedData) => {
+    try {
+      const response = await apiClient.put(`/clients/${clientId}/ped-program`, pedData);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  // Dashboard summary data (combines multiple data points for the dashboard)
+  getDashboardSummary: async (clientId) => {
+    try {
+      const response = await apiClient.get(`/clients/${clientId}/dashboard-summary`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+};
+
+// Error handling helper function
+const handleApiError = (error) => {
+  if (error.response) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    const errorData = error.response.data;
+    return {
+      status: error.response.status,
+      message: errorData.message || 'An error occurred with the API response',
+      data: errorData
+    };
+  } else if (error.request) {
+    // The request was made but no response was received
+    return {
+      status: 0,
+      message: 'No response received from server. Please check your connection.',
+      data: null
+    };
+  } else {
+    // Something happened in setting up the request that triggered an Error
+    return {
+      status: 0,
+      message: error.message || 'An unknown error occurred',
+      data: null
+    };
+  }
+};
+
+export default apiService;
