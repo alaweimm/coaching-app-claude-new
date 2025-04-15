@@ -1,0 +1,67 @@
+// App.js - Main application component with routing
+
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ClientProvider } from './ClientContext';
+import EnhancedDashboard from './EnhancedDashboard';
+import Login from './components/Login';
+import ClientsList from './components/ClientsList';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('auth_token') !== null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Handle login success
+  const handleLoginSuccess = (token) => {
+    localStorage.setItem('auth_token', token);
+    setIsAuthenticated(true);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    setIsAuthenticated(false);
+  };
+
+  // Toggle sidebar
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  return (
+    <Router>
+      <ClientProvider>
+        <div className="flex h-screen bg-gray-100">
+          {isAuthenticated && (
+            <>
+              <Sidebar isOpen={sidebarOpen} />
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <Header onToggleSidebar={toggleSidebar} onLogout={handleLogout} />
+                <main className="flex-1 overflow-y-auto p-4">
+                  <Routes>
+                    <Route path="/dashboard/:clientId" element={<EnhancedDashboard />} />
+                    <Route path="/clients" element={<ClientsList />} />
+                    <Route path="/" element={<Navigate to="/clients" />} />
+                  </Routes>
+                </main>
+              </div>
+            </>
+          )}
+          
+          {!isAuthenticated && (
+            <div className="w-full">
+              <Routes>
+                <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="*" element={<Navigate to="/login" />} />
+              </Routes>
+            </div>
+          )}
+        </div>
+      </ClientProvider>
+    </Router>
+  );
+};
+
+export default App;
