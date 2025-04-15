@@ -1,0 +1,719 @@
+import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+
+// Main Dashboard Component
+const EnhancedDashboard = () => {
+  // Sample client data - in a real application this would be fetched from an API or database
+  const [clientData, setClientData] = useState({
+    name: "Meshal Alawein",
+    age: 35,
+    height: 176,
+    startWeight: 85.7,
+    currentWeight: 84.5,
+    goalWeight: 80.0,
+    checkInDay: "Monday",
+    startDate: "2025-04-14",
+    paymentDate: "",
+    weightChange: -1.2,
+    progress: 21.4
+  });
+
+  // Calculate weeks of coaching
+  const calculateWeeksOfCoaching = () => {
+    const startDate = new Date(clientData.startDate);
+    const today = new Date();
+    const diffTime = Math.abs(today - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.floor(diffDays / 7);
+  };
+
+  // Sample compliance data
+  const [complianceData, setComplianceData] = useState({
+    nutrition: 85,
+    steps: 92,
+    cardio: 93,
+    overall: 90,
+    weeklyDeficit: 2390
+  });
+
+  // Sample body measurements
+  const [measurements, setMeasurements] = useState([
+    { name: "WEIGHT (KG)", initial: 85.7, current: 84.5, change: -1.2 },
+    { name: "CHEST (CM)", initial: 105, current: 104, change: -1 },
+    { name: "WAIST (CM)", initial: 90, current: 88, change: -2 },
+    { name: "HIPS (CM)", initial: 98, current: 97, change: -1 }
+  ]);
+
+  // Sample nutrition protocol
+  const [nutritionProtocol, setNutritionProtocol] = useState({
+    training: {
+      days: 5,
+      protein: 200,
+      proteinPerKg: 2.37,
+      fats: 70,
+      carbs: 150,
+      calories: 2030,
+      deficit: 370
+    },
+    rest: {
+      days: 2,
+      protein: 200,
+      proteinPerKg: 2.37,
+      fats: 70,
+      carbs: 125,
+      calories: 1930,
+      deficit: 470
+    },
+    weekly: {
+      calories: 14010,
+      deficit: 2390
+    }
+  });
+
+  // Sample weekly planner data
+  const [weeklyPlanner, setWeeklyPlanner] = useState([
+    {
+      day: "DAY 1",
+      training: "PUSH",
+      nutrition: "TRAINING",
+      completed: true,
+      cardioGoal: 60,
+      cardioActual: 60,
+      stepsGoal: 10000,
+      stepsActual: 9800,
+      sleep: 7.5,
+      mood: 4,
+      notes: ""
+    },
+    {
+      day: "DAY 2",
+      training: "PULL",
+      nutrition: "TRAINING",
+      completed: true,
+      cardioGoal: 60,
+      cardioActual: 60,
+      stepsGoal: 10000,
+      stepsActual: 10200,
+      sleep: 8,
+      mood: 5,
+      notes: ""
+    },
+    {
+      day: "DAY 3",
+      training: "LOWER B",
+      nutrition: "TRAINING",
+      completed: true,
+      cardioGoal: 60,
+      cardioActual: 60,
+      stepsGoal: 10000,
+      stepsActual: 9500,
+      sleep: 7,
+      mood: 4,
+      notes: ""
+    },
+    {
+      day: "DAY 4",
+      training: "OFF",
+      nutrition: "REST",
+      completed: true,
+      cardioGoal: 0,
+      cardioActual: 0,
+      stepsGoal: 10000,
+      stepsActual: 10500,
+      sleep: 8.5,
+      mood: 5,
+      notes: ""
+    },
+    {
+      day: "DAY 5",
+      training: "UPPER",
+      nutrition: "TRAINING",
+      completed: true,
+      cardioGoal: 60,
+      cardioActual: 50,
+      stepsGoal: 10000,
+      stepsActual: 9200,
+      sleep: 6.5,
+      mood: 3,
+      notes: ""
+    },
+    {
+      day: "DAY 6",
+      training: "LOWER A",
+      nutrition: "TRAINING",
+      completed: true,
+      cardioGoal: 60,
+      cardioActual: 50,
+      stepsGoal: 10000,
+      stepsActual: 9700,
+      sleep: 7,
+      mood: 4,
+      notes: ""
+    },
+    {
+      day: "DAY 7",
+      training: "OFF",
+      nutrition: "REST",
+      completed: true,
+      cardioGoal: 0,
+      cardioActual: 0,
+      stepsGoal: 10000,
+      stepsActual: 9000,
+      sleep: 8,
+      mood: 4,
+      notes: ""
+    }
+  ]);
+
+  // Sample goals data
+  const [goals, setGoals] = useState({
+    shortTerm: "Lose 1kg in the next 2 weeks",
+    midTerm: "Reach 82kg by end of 2nd month",
+    longTerm: "Reach 80kg with visible abs by end of program",
+    coachingNotes: "Good progress in first week. Client is adhering well to nutrition protocol. Consider increasing carbs slightly on training days if energy levels drop. Compliance with cardio and steps is excellent."
+  });
+
+  // Get the color for progress bars based on percentage
+  const getComplianceColor = (percentage) => {
+    if (percentage >= 90) return "bg-green-500";
+    if (percentage >= 75) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+  // Calculate total cardio and steps
+  const totalCardioGoal = weeklyPlanner.reduce((sum, day) => sum + day.cardioGoal, 0);
+  const totalCardioActual = weeklyPlanner.reduce((sum, day) => sum + day.cardioActual, 0);
+  const totalStepsGoal = weeklyPlanner.reduce((sum, day) => sum + day.stepsGoal, 0);
+  const totalStepsActual = weeklyPlanner.reduce((sum, day) => sum + day.stepsActual, 0);
+
+  return (
+    <div className="flex flex-col w-full bg-gray-100 p-4 space-y-6 font-sans">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-4 rounded-md shadow-md">
+        <h1 className="text-2xl font-bold text-white text-center">CLIENT DASHBOARD</h1>
+      </div>
+      
+      {/* Client Information & Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Side - Client Info */}
+        <div className="bg-white rounded-md shadow-md">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+            <h2 className="text-lg font-semibold text-white text-center">CLIENT INFORMATION</h2>
+          </div>
+          
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <table className="w-full">
+                  <tbody>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">CLIENT NAME:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.name}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">AGE:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.age}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">HEIGHT (CM):</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.height}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">START WEIGHT:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.startWeight}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">CURRENT WEIGHT:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.currentWeight}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">GOAL WEIGHT:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.goalWeight}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div>
+                <table className="w-full">
+                  <tbody>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">CHECK IN DAY:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.checkInDay}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">WEEK OF COACHING:</td>
+                      <td className="bg-gray-50 p-2 border">{calculateWeeksOfCoaching()}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">START DATE:</td>
+                      <td className="bg-gray-50 p-2 border">{new Date(clientData.startDate).toLocaleDateString()}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">PAYMENT DATE:</td>
+                      <td className="bg-gray-50 p-2 border">{clientData.paymentDate || "-"}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">WEIGHT CHANGE:</td>
+                      <td className={`bg-gray-50 p-2 border ${clientData.weightChange < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {clientData.weightChange} kg
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold text-orange-500 p-2">PROGRESS (%):</td>
+                      <td className="bg-gray-50 p-2 border text-green-600">{clientData.progress}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right Side - Dashboard Summary */}
+        <div className="bg-white rounded-md shadow-md">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+            <h2 className="text-lg font-semibold text-white text-center">DASHBOARD SUMMARY</h2>
+          </div>
+          
+          <div className="p-4">
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-semibold text-orange-500">NUTRITION COMPLIANCE:</span>
+                  <span className="font-semibold">{complianceData.nutrition}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className={`${getComplianceColor(complianceData.nutrition)} h-2.5 rounded-full`} style={{width: `${complianceData.nutrition}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-semibold text-orange-500">STEPS COMPLIANCE:</span>
+                  <span className="font-semibold">{complianceData.steps}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className={`${getComplianceColor(complianceData.steps)} h-2.5 rounded-full`} style={{width: `${complianceData.steps}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-semibold text-orange-500">CARDIO COMPLIANCE:</span>
+                  <span className="font-semibold">{complianceData.cardio}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className={`${getComplianceColor(complianceData.cardio)} h-2.5 rounded-full`} style={{width: `${complianceData.cardio}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-semibold text-orange-500">OVERALL SCORE:</span>
+                  <span className="font-semibold">{complianceData.overall}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className={`${getComplianceColor(complianceData.overall)} h-2.5 rounded-full`} style={{width: `${complianceData.overall}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-semibold text-orange-500">WEEKLY CALORIE DEFICIT:</span>
+                  <span className="font-semibold">{complianceData.weeklyDeficit} kcal</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-blue-500 h-2.5 rounded-full" style={{width: '80%'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Weight & Body Measurements */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Weight Progress Chart */}
+        <div className="bg-white rounded-md shadow-md">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+            <h2 className="text-lg font-semibold text-white text-center">WEIGHT PROGRESS</h2>
+          </div>
+          <div className="p-4 h-64 flex items-center justify-center">
+            <div className="w-full h-full bg-blue-50 rounded-md p-2 flex items-center justify-center">
+              <svg viewBox="0 0 400 200" className="w-full h-full">
+                {/* X-Axis */}
+                <line x1="50" y1="150" x2="350" y2="150" stroke="#333" />
+                {/* Y-Axis */}
+                <line x1="50" y1="30" x2="50" y2="150" stroke="#333" />
+                
+                {/* Graph Line */}
+                <path d="M50,120 L100,118 L150,115 L200,110 L250,105 L300,102 L350,100" 
+                      stroke="#3B82F6" 
+                      strokeWidth="2" 
+                      fill="none" />
+                
+                {/* Goal Line */}
+                <path d="M50,80 L350,80" 
+                      stroke="#F59E0B" 
+                      strokeWidth="2" 
+                      strokeDasharray="5,5"
+                      fill="none" />
+                
+                {/* Data Points */}
+                <circle cx="50" cy="120" r="3" fill="#3B82F6" />
+                <circle cx="100" cy="118" r="3" fill="#3B82F6" />
+                <circle cx="150" cy="115" r="3" fill="#3B82F6" />
+                <circle cx="200" cy="110" r="3" fill="#3B82F6" />
+                <circle cx="250" cy="105" r="3" fill="#3B82F6" />
+                <circle cx="300" cy="102" r="3" fill="#3B82F6" />
+                <circle cx="350" cy="100" r="3" fill="#3B82F6" />
+                
+                {/* Labels */}
+                <text x="20" y="80" fontSize="10" fill="#F59E0B">Goal</text>
+                <text x="40" y="170" fontSize="8" textAnchor="middle">0</text>
+                <text x="100" y="170" fontSize="8" textAnchor="middle">1</text>
+                <text x="150" y="170" fontSize="8" textAnchor="middle">2</text>
+                <text x="200" y="170" fontSize="8" textAnchor="middle">3</text>
+                <text x="250" y="170" fontSize="8" textAnchor="middle">4</text>
+                <text x="300" y="170" fontSize="8" textAnchor="middle">5</text>
+                <text x="350" y="170" fontSize="8" textAnchor="middle">6</text>
+                <text x="200" y="185" fontSize="10" textAnchor="middle">Weeks</text>
+                
+                <text x="20" y="50" fontSize="10" fill="#333" transform="rotate(-90,20,50)">Weight (kg)</text>
+                <text x="50" y="125" fontSize="8" textAnchor="end">85</text>
+                <text x="50" y="100" fontSize="8" textAnchor="end">80</text>
+                <text x="50" y="75" fontSize="8" textAnchor="end">75</text>
+                <text x="50" y="50" fontSize="8" textAnchor="end">70</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        {/* Body Measurements */}
+        <div className="bg-white rounded-md shadow-md">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+            <h2 className="text-lg font-semibold text-white text-center">BODY MEASUREMENTS</h2>
+          </div>
+          <div className="p-4">
+            <table className="min-w-full">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">MEASUREMENT</th>
+                  <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">INITIAL</th>
+                  <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">CURRENT</th>
+                  <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">CHANGE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {measurements.map((measurement, index) => (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                    <td className="py-2 px-3 whitespace-nowrap">{measurement.name}</td>
+                    <td className="py-2 px-3 whitespace-nowrap">{measurement.initial}</td>
+                    <td className="py-2 px-3 whitespace-nowrap">{measurement.current}</td>
+                    <td className={`py-2 px-3 whitespace-nowrap ${measurement.change < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {measurement.change}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      {/* Nutrition Protocol */}
+      <div className="bg-white rounded-md shadow-md">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+          <h2 className="text-lg font-semibold text-white text-center">NUTRITION PROTOCOL</h2>
+        </div>
+        <div className="p-4 overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">DAY TYPE</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">DAYS</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">PROTEIN (G)</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">P/KG BW</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">FATS (G)</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">CARBS (G)</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">CALORIES</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">DEFICIT</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              <tr>
+                <td className="py-2 px-3 whitespace-nowrap">TRAINING</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.days}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.protein}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.proteinPerKg}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.fats}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.carbs}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.calories}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.deficit}</td>
+              </tr>
+              <tr className="bg-gray-50">
+                <td className="py-2 px-3 whitespace-nowrap">REST</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.days}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.protein}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.proteinPerKg}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.fats}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.carbs}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.calories}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.rest.deficit}</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-3 whitespace-nowrap font-bold">WEEKLY TOTALS</td>
+                <td className="py-2 px-3 whitespace-nowrap">7</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.protein * nutritionProtocol.training.days + nutritionProtocol.rest.protein * nutritionProtocol.rest.days}</td>
+                <td className="py-2 px-3 whitespace-nowrap">-</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.fats * nutritionProtocol.training.days + nutritionProtocol.rest.fats * nutritionProtocol.rest.days}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.training.carbs * nutritionProtocol.training.days + nutritionProtocol.rest.carbs * nutritionProtocol.rest.days}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{nutritionProtocol.weekly.calories}</td>
+                <td className="py-2 px-3 whitespace-nowrap font-bold">{nutritionProtocol.weekly.deficit}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Expenditure Protocol */}
+      <div className="bg-white rounded-md shadow-md">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+          <h2 className="text-lg font-semibold text-white text-center">EXPENDITURE PROTOCOL</h2>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <h3 className="text-center font-semibold mb-2">DAILY STEP GOAL</h3>
+            <div className="text-center text-2xl font-bold">10,000</div>
+          </div>
+          <div>
+            <h3 className="text-center font-semibold mb-2">WEEKLY STEP GOAL</h3>
+            <div className="flex flex-col items-center">
+              <div className="text-center text-2xl font-bold mb-2">{totalStepsGoal.toLocaleString()}</div>
+              <div className="w-full bg-gray-200 rounded-full h-4">
+                <div className={`${getComplianceColor(totalStepsActual/totalStepsGoal*100)} h-4 rounded-full`} 
+                     style={{width: `${(totalStepsActual/totalStepsGoal*100).toFixed(1)}%`}}></div>
+              </div>
+              <div className="text-sm mt-1">{totalStepsActual.toLocaleString()} steps ({(totalStepsActual/totalStepsGoal*100).toFixed(1)}%)</div>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-center font-semibold mb-2">WEEKLY CARDIO GOAL</h3>
+            <div className="flex flex-col items-center">
+              <div className="text-center text-2xl font-bold mb-2">{totalCardioGoal} min</div>
+              <div className="w-full bg-gray-200 rounded-full h-4">
+                <div className={`${getComplianceColor(totalCardioActual/totalCardioGoal*100)} h-4 rounded-full`} 
+                     style={{width: `${(totalCardioActual/totalCardioGoal*100).toFixed(1)}%`}}></div>
+              </div>
+              <div className="text-sm mt-1">{totalCardioActual} min ({(totalCardioActual/totalCardioGoal*100).toFixed(1)}%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Weekly Planner */}
+      <div className="bg-white rounded-md shadow-md">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+          <h2 className="text-lg font-semibold text-white text-center">WEEKLY PLANNER</h2>
+        </div>
+        <div className="p-4 overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">DAY</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">TRAINING</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">NUTRITION</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">COMPLETED</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">CARDIO GOAL</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">CARDIO ACTUAL</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">STEPS GOAL</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">STEPS ACTUAL</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">SLEEP (HRS)</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">MOOD (1-5)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {weeklyPlanner.map((day, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                  <td className="py-2 px-3 whitespace-nowrap font-medium text-orange-500">{day.day}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.training}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.nutrition}</td>
+                  <td className="py-2 px-3 whitespace-nowrap text-green-600">{day.completed ? '✓' : ''}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.cardioGoal}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.cardioActual}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.stepsGoal.toLocaleString()}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.stepsActual.toLocaleString()}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.sleep}</td>
+                  <td className="py-2 px-3 whitespace-nowrap">{day.mood}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-semibold">
+                <td className="py-2 px-3 whitespace-nowrap">TOTALS</td>
+                <td className="py-2 px-3 whitespace-nowrap">-</td>
+                <td className="py-2 px-3 whitespace-nowrap">-</td>
+                <td className="py-2 px-3 whitespace-nowrap">
+                  {weeklyPlanner.filter(day => day.completed).length}/{weeklyPlanner.length}
+                </td>
+                <td className="py-2 px-3 whitespace-nowrap">{totalCardioGoal}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{totalCardioActual}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{totalStepsGoal.toLocaleString()}</td>
+                <td className="py-2 px-3 whitespace-nowrap">{totalStepsActual.toLocaleString()}</td>
+                <td className="py-2 px-3 whitespace-nowrap">
+                  {(weeklyPlanner.reduce((sum, day) => sum + day.sleep, 0) / weeklyPlanner.length).toFixed(1)}
+                </td>
+                <td className="py-2 px-3 whitespace-nowrap">
+                  {(weeklyPlanner.reduce((sum, day) => sum + day.mood, 0) / weeklyPlanner.length).toFixed(1)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Goals & Notes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-md shadow-md">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+            <h2 className="text-lg font-semibold text-white text-center">GOALS</h2>
+          </div>
+          
+          <div className="p-4">
+            <div className="mb-4">
+              <h3 className="font-semibold text-orange-500 mb-1">SHORT TERM</h3>
+              <div className="bg-gray-50 p-2 border rounded">{goals.shortTerm}</div>
+            </div>
+            
+            <div className="mb-4">
+              <h3 className="font-semibold text-orange-500 mb-1">MID TERM</h3>
+              <div className="bg-gray-50 p-2 border rounded">{goals.midTerm}</div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-orange-500 mb-1">LONG TERM</h3>
+              <div className="bg-gray-50 p-2 border rounded">{goals.longTerm}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-md shadow-md">
+          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+            <h2 className="text-lg font-semibold text-white text-center">WEEKLY COACHING NOTES</h2>
+          </div>
+          
+          <div className="p-4">
+            <div className="bg-gray-50 p-3 border rounded h-full">
+              <p className="text-sm">{goals.coachingNotes}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* PED Program Section - Hidden by default, can be toggled */}
+      <div className="bg-white rounded-md shadow-md">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+          <h2 className="text-lg font-semibold text-white text-center">PED PROGRAM</h2>
+        </div>
+        <div className="p-4">
+          <div className="flex justify-center mb-4">
+            <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 w-full md:w-2/3">
+              <p className="font-bold">PED Protocol Management</p>
+              <p>This section allows you to track PED usage, dosages, and timing. Click to expand for detailed protocol information.</p>
+            </div>
+          </div>
+          <div className="flex justify-center">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Show PED Protocol Details
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Health Markers Dashboard */}
+      <div className="bg-white rounded-md shadow-md">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+          <h2 className="text-lg font-semibold text-white text-center">HEALTH MARKERS</h2>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-gray-50 p-3 rounded shadow">
+            <h3 className="text-center font-semibold text-orange-500 mb-2">BLOOD PRESSURE</h3>
+            <div className="text-center text-xl">120/80</div>
+            <div className="text-center text-sm text-green-600">Normal</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded shadow">
+            <h3 className="text-center font-semibold text-orange-500 mb-2">RESTING HEART RATE</h3>
+            <div className="text-center text-xl">65 bpm</div>
+            <div className="text-center text-sm text-green-600">Excellent</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded shadow">
+            <h3 className="text-center font-semibold text-orange-500 mb-2">SLEEP QUALITY</h3>
+            <div className="text-center text-xl">7.5 hrs</div>
+            <div className="text-center text-sm text-green-600">Good</div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded shadow">
+            <h3 className="text-center font-semibold text-orange-500 mb-2">AVERAGE MOOD</h3>
+            <div className="text-center text-xl">4.1/5</div>
+            <div className="text-center text-sm text-green-600">Very Good</div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Supplements List */}
+      <div className="bg-white rounded-md shadow-md">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-t-md">
+          <h2 className="text-lg font-semibold text-white text-center">SUPPLEMENT LIST</h2>
+        </div>
+        <div className="p-4">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">SUPPLEMENT</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">DOSAGE</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">TIMING</th>
+                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">PURPOSE</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              <tr className="bg-gray-50">
+                <td className="py-2 px-3 whitespace-nowrap">Whey Protein</td>
+                <td className="py-2 px-3 whitespace-nowrap">25g</td>
+                <td className="py-2 px-3 whitespace-nowrap">Post-workout</td>
+                <td className="py-2 px-3">Muscle recovery and protein supplementation</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-3 whitespace-nowrap">Creatine Monohydrate</td>
+                <td className="py-2 px-3 whitespace-nowrap">5g</td>
+                <td className="py-2 px-3 whitespace-nowrap">Daily</td>
+                <td className="py-2 px-3">Strength and power output</td>
+              </tr>
+              <tr className="bg-gray-50">
+                <td className="py-2 px-3 whitespace-nowrap">Vitamin D3</td>
+                <td className="py-2 px-3 whitespace-nowrap">5000 IU</td>
+                <td className="py-2 px-3 whitespace-nowrap">Morning with meal</td>
+                <td className="py-2 px-3">Immune function and bone health</td>
+              </tr>
+              <tr>
+                <td className="py-2 px-3 whitespace-nowrap">Fish Oil</td>
+                <td className="py-2 px-3 whitespace-nowrap">2g</td>
+                <td className="py-2 px-3 whitespace-nowrap">With meals</td>
+                <td className="py-2 px-3">Inflammation management and heart health</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-2 rounded-md shadow-md mt-6">
+        <div className="text-center text-white text-sm">
+          <p>Enhanced Coaching Dashboard • Created by Meshal Alawein • {new Date().getFullYear()}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedDashboard;
